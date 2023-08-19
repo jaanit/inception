@@ -1,0 +1,47 @@
+services:
+  mariadb_container:
+    build: requirements/mariadb
+    image: mariadb
+    container_name: mariadb_container
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    networks:
+      - net_container
+
+  nginx_container:
+    build: requirements/nginx
+    image: nginx
+    container_name: nginx_container
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "443:443"
+    networks:
+      - net_container
+    volumes:
+      - wp:/var/www/html
+
+  wordpress_container:
+    build: requirements/wordpress
+    image: wordpress
+    container_name: wordpress_container
+    restart: on-failure
+    env_file:
+      - .env
+    networks:
+      - net_container
+    volumes:
+      - wp:/var/www/html
+    depends_on:
+      - mariadb_container
+
+networks:
+  net_container:
+
+volumes:
+  wp:
+  db:

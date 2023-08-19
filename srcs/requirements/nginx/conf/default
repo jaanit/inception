@@ -1,0 +1,30 @@
+server {
+	listen 443 ssl http2;
+
+	ssl_certificate /etc/certs/rjaanit_42_fr.csr;
+	ssl_certificate_key /etc/certs/rjaanit_42_fr.key;
+    ssl_protocols TLSv1.3;
+	root /var/www/html;
+
+    index index.php index.html index.htm index.nginx-debian.html;
+	server_name localhost;
+	location / {
+        try_files $uri $uri/ =404;
+    }
+
+	# pass PHP scripts to FastCGI server
+	#
+	location ~ .php$ {
+        try_files $uri =404;
+
+        # Include the default FastCGI parameters for PHP scripts
+        include /etc/nginx/fastcgi_params;
+
+        # Pass the request to the WordPress container
+        fastcgi_pass wordpress_container:9000;
+
+        # Set the SCRIPT_FILENAME parameter to the document root plus the script name
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+
