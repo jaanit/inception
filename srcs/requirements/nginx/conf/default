@@ -21,7 +21,7 @@ server {
         include /etc/nginx/fastcgi_params;
 
         # Pass the request to the WordPress container
-        fastcgi_pass wordpress_container:9000;
+        fastcgi_pass wordpress:9000;
 
         # Set the SCRIPT_FILENAME parameter to the document root plus the script name
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
