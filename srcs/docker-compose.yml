@@ -48,4 +48,12 @@ networks:
 
 volumes:
   wp:
+    driver_opts:
+      device: /Users/rjaanit/Desktop/vl/wp
+      type: none
+      o: bind
   db:
+    driver_opts:
+      device: /Users/rjaanit/Desktop/vl/db
+      type: none
+      o: bind

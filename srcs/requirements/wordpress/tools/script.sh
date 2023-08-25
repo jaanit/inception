@@ -11,4 +11,3 @@ wp core install --path=/var/www/html --url='localhost' --title='wordpress' --adm
 wp core version --path=/var/www/html --allow-root
 echo "Wordpress is ready to use OK !"
 php-fpm7.4 -F
-wp core version --path=/var/www/html --allow-root
