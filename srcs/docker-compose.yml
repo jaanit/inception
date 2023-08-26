@@ -49,11 +49,11 @@ networks:
 volumes:
   wp:
     driver_opts:
-      device: /Users/rjaanit/Desktop/vl/wp
+      device: /home/rjaanit/data/wp
       type: none
       o: bind
   db:
     driver_opts:
-      device: /Users/rjaanit/Desktop/vl/db
+      device: /home/rjaanit/data/db
       type: none
       o: bind
