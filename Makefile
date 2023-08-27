@@ -8,12 +8,14 @@ down:
 	cd /home/lagala/Desktop/inception/srcs && docker compose down 
 
 restart:
-	cd /home/lagala/Desktop/inception/srcs && docker compose restart
+	cd /home/lagala/Desktop/inception/srcs && docker compose start
 
 build:
 	cd /home/lagala/Desktop/inception/srcs && docker compose build
+stop:
+	cd /home/lagala/Desktop/inception/srcs && docker compose stop
 fclean: down
 	sudo rm -Rf /home/rjaanit/data/wp
 	sudo rm -Rf /home/rjaanit/data/db
-	sudo docker volume rm srcs_wp
-	sudo docker volume rm srcs_db
+	@docker rmi -f $$(docker images -qa)
+	docker volume rm $$(docker volume ls -q)
