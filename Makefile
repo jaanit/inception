@@ -3,17 +3,17 @@
 up:
 	@mkdir -p /home/rjaanit/data/wp
 	@mkdir -p /home/rjaanit/data/db
-	cd /home/lagala/Desktop/inception/srcs && docker compose up --build
+	cd /srcs && docker compose up --build
 down:
-	cd /home/lagala/Desktop/inception/srcs && docker compose down 
+	cd /srcs && docker compose down 
 
 restart:
-	cd /home/lagala/Desktop/inception/srcs && docker compose start
+	cd /srcs && docker compose start
 
 build:
-	cd /home/lagala/Desktop/inception/srcs && docker compose build
+	cd /srcs && docker compose build
 stop:
-	cd /home/lagala/Desktop/inception/srcs && docker compose stop
+	cd /srcs && docker compose stop
 fclean: down
 	sudo rm -Rf /home/rjaanit/data/wp
 	sudo rm -Rf /home/rjaanit/data/db
