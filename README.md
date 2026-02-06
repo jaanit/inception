@@ -1,46 +1,117 @@
-# inception
-Docker app running wordpress, mysql and nginx on three different containers.
-# What is Docker 
-Docker is an open-source tool for containerization that streamlines application creation and deployment through the use of containers. 
-Containers enable us to bundle all parts of an application into a single package for deployment.
-This tool makes it easy for different developers to work on the same project in the same environment without any dependencies or OS issues. 
-Docker functions similarly to a virtual machine, however, it enables applications to share the same Linux kernel.
-# Docker Client
-A Docker Client is a component used by a Docker user to interact with the Docker daemon and issue commands. These commands are based on the Docker API.
+# Inception
 
-# Containers and images
-The basic structure of Docker relies on images and containers. We can think of a container as an object and an image as its class.
+A Docker-based infrastructure project that sets up a small network of services using Docker Compose. The project orchestrates three main containers:
 
-A container is an isolated system that holds everything required to run a specific application. It is a specific instance of an image that simulates the necessary environment. 
-The following is an example command for running an Ubuntu Docker container and accessing the bash shell:
-docker run -i -t ubuntu /bin/bash
+- **NGINX**: Acts as the web server and entry point, handling SSL/TLS.
+- **WordPress**: The content management system running on PHP-FPM.
+- **MariaDB**: The database management system for WordPress.
 
-Images, on the other hand, are used to start up containers. From running containers, we can get images, which can be composed together to form a system-agnostic way of packaging applications.
-Images can be pre-built, retrieved from registries, created from already existing ones, or combined together via a common network.
+## Prerequisites
 
-# Dockerfiles
-Dockerfiles are how we containerize our application, or how we build a new container from an already pre-built image and add custom logic to start our application. From a Dockerfile, we use the Docker build command to create an image.
+- **Docker**: Ensure Docker is installed and running.
+- **Docker Compose**: Required for orchestrating multi-container applications.
+- **Make**: Used to simplify build and management commands.
 
-Think of a Dockerfile as a text document that contains the commands we call on the command line to build an image.
+## Project Structure
 
-# Layers
-A Dockerfile works in layers. These are the building blocks of Docker. The first layer starts with the FROMkeyword and defines which pre-built image we will use to build an image. We can then define user permissions and startup scripts.
+```
+.
+├── Makefile                # Management commands
+├── README.md               # Project documentation
+└── srcs                    # Source configurations
+    ├── .env                # Environment variables
+    ├── clean.sh            # Cleanup script
+    ├── docker-compose.yml  # Docker Compose configuration
+    ├── pid.sh              # PID checking script
+    └── requirements        # Docker build contexts
+        ├── mariadb
+        ├── nginx
+        └── wordpress
+```
 
-In Docker, a container is an image with a readable layer built on top of a read-only layer. These layers are called intermediate images, and they are generated when we execute the commands in our Dockerfile during the build stage.
+## Configuration
 
-# Docker Registry
-Docker Registry is a centralized location for storing and distributing Docker images. The most commonly used public registry is Docker Hub, but you can also create your own private registry.
+### Environment Variables
 
-# Docker Daemon
-Docker Daemon runs on a host machine and manages containers, images, networks, and volumes. It receives commands from the Docker client and executes them. The Docker daemon uses Docker images to create containers.
+The project uses a `.env` file located in `srcs/` to configure services. It includes database credentials, domain names, and other settings.
 
-#Docker Hub
-Docker Hub is a Docker Registry that provides unlimited storage for public images and offers paid plans for hosting private images. Anybody can access a public image. But to publish and access images on Docker Hub, you must create an account first.
+> **Note:** The default `.env` contains credentials for testing purposes. For production use, please change them.
 
-# Dockerfile vs Docker Compose
-Both Dockerfile and Docker Compose are tools in the Docker image ecosystem. Dockerfile is a text file that contains an image, and the commands a developer can call to assemble the image. The commands are typically simple processes like installing dependencies, copying files, and configuring settings.
+### Data Storage
 
-Docker Compose is a tool for defining and running multi-container Docker applications. Information describing the services and networks for an application are contained within a YAML file, called docker-compose.yml.
+The project is configured to use persistent storage volumes located at `/home/rjaanit/data/wp` and `/home/rjaanit/data/db` (as defined in `srcs/docker-compose.yml` and `Makefile`).
 
-One of the base functions of Docker Compose is to build images from Dockerfiles. However, Docker Compose is capable of orchestrating the containerization and deployment of multiple software packages. You can select which images are used for certain services, set environment-specific variables, configure network connections, and much more.
-In summary, Dockerfiles define the instructions to a single image in an application, but Docker Compose is the tool that allows you to create and manipulate a multi-container application.
+If you are running this on a different user or system, you **must** update the paths in:
+1. `Makefile` (under the `up` and `fclean` targets)
+2. `srcs/docker-compose.yml` (under the `volumes` section)
+
+## Usage
+
+Use the provided `Makefile` to manage the lifecycle of the application.
+
+### Build and Start
+
+To build the images and start the containers in the background:
+
+```bash
+make up
+```
+
+This command will:
+1. Create the necessary data directories (e.g., `/home/rjaanit/data/...`).
+2. Build the Docker images for MariaDB, WordPress, and NGINX.
+3. Start the containers.
+
+### Stop and Remove
+
+To stop and remove the containers:
+
+```bash
+make down
+```
+
+### Start / Stop
+
+To start stopped containers without rebuilding:
+```bash
+make start
+```
+
+To stop running containers without removing them:
+```bash
+make stop
+```
+
+### Clean / Reset
+
+To remove all containers, images, volumes, and data directories (WARNING: This will delete all data in the volumes):
+
+```bash
+make fclean
+```
+
+> **Note:** `make fclean` uses `sudo` to remove the data directories.
+
+## Services Overview
+
+### MariaDB
+- **Build Context:** `srcs/requirements/mariadb`
+- **Port:** Internal only (accessible by WordPress container)
+- **Volume:** Persists database data.
+
+### WordPress
+- **Build Context:** `srcs/requirements/wordpress`
+- **Port:** Internal only (accessible by NGINX container)
+- **Dependencies:** Waits for MariaDB to be ready.
+
+### NGINX
+- **Build Context:** `srcs/requirements/nginx`
+- **Port:** 443 (HTTPS)
+- **Dependencies:** Waits for WordPress to be ready.
+- **Volume:** Persists WordPress files.
+
+## Accessing the Application
+
+Once the containers are up and running, you can access the WordPress site by navigating to `https://localhost` (or the domain configured in your `.env` file, e.g., `rjaanit.42.fr`) in your web browser.
+
+> Note: Since the project uses a self-signed certificate, your browser may warn you about the security of the connection. You can proceed safely for development purposes.
